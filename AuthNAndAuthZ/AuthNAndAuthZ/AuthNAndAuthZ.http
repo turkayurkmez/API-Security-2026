@@ -1,0 +1,30 @@
+@AuthNAndAuthZ_HostAddress = https://localhost:7117
+
+### Test 1: Admin Login - Success
+GET {{AuthNAndAuthZ_HostAddress}}/api/account/balance
+Accept: application/json
+Authorization: Basic YWRtaW46UEBzc3cwcmQxMjMh
+
+### Test 2: Wrong Credentials
+GET {{AuthNAndAuthZ_HostAddress}}/api/account/balance
+Accept: application/json
+Authorization: Basic d3Jvbmc6Y3JlZGVudGlhbHM=
+
+### Test 3: No Authorization Header
+GET {{AuthNAndAuthZ_HostAddress}}/api/account/balance
+Accept: application/json
+
+### Test 4: Alice Profile - Success
+GET {{AuthNAndAuthZ_HostAddress}}/api/account/profile
+Accept: application/json
+Authorization: Basic YWxpY2U6QWxpY2VTZWNyZXQ=
+
+### Test 5: Bob Profile - Success
+GET {{AuthNAndAuthZ_HostAddress}}/api/account/profile
+Accept: application/json
+Authorization: Basic Ym9iOkJvYlNlY3JldA==
+
+### Test 6: Profile - Wrong Credentials
+GET {{AuthNAndAuthZ_HostAddress}}/api/account/profile
+Accept: application/json
+Authorization: Basic d3Jvbmc6Y3JlZGVudGlhbHM=
