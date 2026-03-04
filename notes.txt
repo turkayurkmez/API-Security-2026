@@ -1,0 +1,50 @@
+SOAP Mimarisi: Daha katı,geliştirilmesi daha zor. Ama güvenlik açıkları una daha sınırlı Legacy konuşma yöntemi
+REST API (REpresentational State Transfer): Gerekli durumları (kullanıcı bilgisi vs) istek ile birlikte sunucuya gönderen,Sunucunun durumu ASLA kaydetmediği yapı.
+Graph QL
+
+Attack Surface (Saldırı Yüzeyi)
+  * Endpoint'ler
+  * Kimlik Bilgileri nasıl denetleniyor?
+  * Dış erişimlerin her biri de bir endpoint olarak değerlendirilmeli
+  * API dokümantasyonu
+
+GET /api/statements/download?fileId=10235 --> IDOR 
+https://medium.com/@instatunnel/insecure-direct-object-references-idor-the-1-billion-authorization-bug-cfc342ba428a
+
+
+                           Tehlikeli      	Güvenli
+Kimlik biligisi nerede?    Kod içinde     	Config'de şifreli / Key Vault'da
+JWT İmzası                 Doğrulanmaması	Sunucuda veify ediliyor (issuer ve aud tanımlı)
+Algoritma	           Client'dan geliyor	Sunucuda tanımlı
+Hatalı Girişler            Loglanmıyor          IP adresi ile birlikte lloglanıyor
+Token Süresi               Sonsuz               Expire oluyor
+
+
+      DENETİM KONTROL NOKTALARI
+
+1. Kimlik Doğrulama Mekanizması Seçimi
+    
+  Kontrol					Kırmızı				Yeşil
+  Hangi auth mekanizması kullanılıyor		Basic / Tek başına API Key      JWT / OAuth2.0
+  Mekanizma seçimi belgelenmiş mi?	        Sözlü ifade, belge yok	        Mimari kaydı var
+  TLS (https) zorunlu mu?			Test/UAT ortamında var		Tüm endpoint'lere https:// ile erişiliyor.
+
+2. Token ve Kimlik Bilgilerinin Yönetimi
+
+ Şifre nerede saklanıyor?                       Kod ya da configde açıksa       Vault, HashiCorp, Azure vss
+ Token süresi ne kadar?                         Sonsuz ya da uzun               Access Token 20-30 dk. Refresh Min 7 gün
+ Token iptal mekanizması var mı?		İptal Edilmiyor                 Blacklist 
+ API key rotasyon politikası var mı?            "Hiç değiştirilmedi"            Periyodik bakım + otomatik hatırlatıcı
+
+3. Brute Force (DDOS) ve Anomali Koruması
+ Başarısız istekler sınırlanıyormu?             Sınır yok                       4 hatalı denemede banal (kilitle)
+ Şüpheli IP'ler engelleniyor mu?                Elle müdahale gerekiyor		Otomatik IP Bloklama
+ Kritik endpoint istekleri loglanıyor mu?	Loglama yok!	                IP, Zaman, Kullanıcı kodu - adı loglanıyor.
+
+4. JWT Özel Kontrolleri
+ İmza doğrulaması yapılıyor mu?	               Bypass ediliyor	                IssuerSigninKey ile denetleniyor. 
+ Algoritma bilgisi sunucuda mı?                İstemciden geliyor               Server'da tanımlı
+ JWT Payload'da hassas ver mi?            TCKimlikNo, hesap no,şifre            Id, Rol,aud,iss
+ exp zorunlu mu?                          Opsiyonel                             Zorunlu ve kontrol ediliyor.
+
+				     

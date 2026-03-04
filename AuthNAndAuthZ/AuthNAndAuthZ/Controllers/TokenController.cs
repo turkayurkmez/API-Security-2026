@@ -1,13 +1,16 @@
+using AuthNAndAuthZ.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AuthNAndAuthZ.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TokenController : ControllerBase
+public class TokenController(IUserService userService) : ControllerBase
 {
     // GUVENLIK ACIGI: "Algorithm Confusion / Algorithm None" saldirisina acik JWT dogrulama.
     //
@@ -107,7 +110,7 @@ public class TokenController : ControllerBase
     /// Bu action, gecersiz token ile hic cagirilmaz; istek middleware katmaninda durur.
     /// </summary>
     [HttpGet("secure-account")]
-    [Authorize]
+    [Authorize(Roles ="admin")]//iþi olmayan giremez:
     public IActionResult SecureGetAccount()
     {
         // Bu noktaya yalnizca gecerli, imzali ve suresi dolmamis token ile ulasilabilir.
@@ -133,4 +136,44 @@ public class TokenController : ControllerBase
             claims   = User.Claims.Select(c => new { c.Type, c.Value })
         });
     }
+
+    [HttpPost("login")]
+    // Bu endpoint, demo amacli olarak JWT olusturur; gercek uygulamalarda kullanici dogrulama ve token olusturma
+    // islemleri daha guvenli sekilde yapilmalidir.
+
+        public async Task<IActionResult> Login(LoginRequest loginRequest)
+    {
+        // Demo: Sabit bir JWT token donduruyoruz; gercek uygulamada kullanici dogrulama yapilmali ve
+        // token dinamik olarak olusturulmalidir.
+
+        var validUser = await userService.ValidateCredentialsAsync(loginRequest.Username, loginRequest.Password);
+        if (!validUser)
+        {
+            return Unauthorized(new { message = "Gecersiz kullanici adi veya sifre." });
+        }
+
+
+
+        var demoToken = new JwtSecurityToken(
+            issuer: "AuthNAndAuthZ.Api",
+            audience: "AuthNAndAuthZ.Client",
+            claims: new[]
+            {
+                new System.Security.Claims.Claim(JwtRegisteredClaimNames.Sub, "demo-user"),
+                new System.Security.Claims.Claim("role", "admin")
+            },
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes("bu-anahtar-uretim-ortaminda-environment-variable-veya-key-vault-uzerinden-gelmeli!")),
+                SecurityAlgorithms.HmacSha256)
+        );
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(demoToken);
+        return Ok(new
+        {
+            token = tokenString,
+            message = "Bu token demo amacli olusturulmustur. Gercek uygulamalarda kullanici dogrulama yapilmali ve token dinamik olarak olusturulmalidir."
+        });
+    }
+
+    public record LoginRequest(string Username, string Password);
 }

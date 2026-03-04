@@ -60,7 +60,7 @@ public class AccountController : ControllerBase
 
             // 4. GUVENLIK ACIGI: Duz metin karsilastirma + hardcoded kimlik bilgileri.
             //    Timing attack'lara karsi savunmasizdir ve sifreler hash'lenmemistir.
-            if (username != HardcodedUsername || password != HardcodedPassword)
+            if (username != "HardcodedUsername" || password != HardcodedPassword)
             {
                 return Unauthorized(new { message = "Kullanici adi veya sifre hatali." });
             }
