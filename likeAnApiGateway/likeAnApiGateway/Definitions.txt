@@ -1,0 +1,8 @@
+﻿1. Strict-Transport-Security: "Benimle sadece https üzerinden iletişim kur. 1 yıl süre http'yi düşünme"
+
+2. X-Content-Type-Options:no-sniff "Ey istemci, dosya türünü tahmin etmeye çalışma. Ben ne diyorsam o!"
+
+3. X-Frame-Options: DENY "Benim içeriğimi başka bir sitenin içine gömme. Ben sadece kendi sayfamda gösterilirim!"
+4. Content-Security-Policy: "Sayfam, sadece şu kaynaklardan script yükleyeblir."
+5. Cache-Control: no-cache, no-store "Benim içeriğimi saklama, her zaman taze veriyi getir!"
+6. Referrer-Policy: no-referrer "Benim sayfamdan başka bir sayfaya gittiğinde,URL bilgimi paylaşma"
