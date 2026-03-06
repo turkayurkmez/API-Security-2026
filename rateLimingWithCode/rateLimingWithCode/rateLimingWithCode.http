@@ -1,0 +1,6 @@
+@rateLimingWithCode_HostAddress = http://localhost:5134
+
+GET {{rateLimingWithCode_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
